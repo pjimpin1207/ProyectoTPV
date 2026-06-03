@@ -1,27 +1,14 @@
-package main;
+package main; // Cambia esto si tu clase Main está en otro paquete o bórralo si está suelta en src
 
-import java.util.Date;
-import controlador.SistemaTPV;
-import modelo.Categoria;
-import modelo.Producto;
-import modelo.Ticket;
+import ui.VentanaLogin;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Iniciando Sistema TPV");
-
-        // Instanciación del controlador
-        SistemaTPV tpv = new SistemaTPV();
-        tpv.iniciarSesion(new Date());
-
-        // crear ticket
-        Ticket testTicket = new Ticket(1);
-        testTicket.añadirProducto(new Producto(101, "Cerveza", Categoria.BEBIDA, 2.50f));
-        testTicket.añadirProducto(new Producto(204, "Patatas", Categoria.COMIDA, 4.50f));
-
-        System.out.println(testTicket);
-
-        tpv.registrarTicket(testTicket);
-        tpv.mostrarResumenCaja();
+        // Ejecutar la interfaz gráfica en el hilo especial de eventos de Swing (buenas prácticas)
+        SwingUtilities.invokeLater(() -> {
+            VentanaLogin ventana = new VentanaLogin();
+            ventana.setVisible(true);
+        });
     }
 }

@@ -1,13 +1,27 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import excepciones.ProductoNoEncontradoException;
 
-public class Ticket {
+@Entity
+public class Ticket implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
     private int numeroTicket;
-    private ArrayList<Producto> productos;  // Uso de colecciones obligatorias [cite: 13, 54]
+
+    // Almacenamos la lista de productos directamente como objetos dentro del Ticket en la BBDD orientada a objetos
+    private ArrayList<Producto> productos;
     private float total;
     private String observaciones;
+
+    public Ticket() {
+        // POJO
+    }
 
     public Ticket(int numeroTicket) {
         this.numeroTicket = numeroTicket;
@@ -38,7 +52,6 @@ public class Ticket {
     }
 
     public float calcularTotal() {
-        // Uso de Streams y Programación funcional (Lambda) para el cálculo eficiente [cite: 23, 31]
         this.total = (float) productos.stream()
                 .mapToDouble(Producto::getPrecio)
                 .sum();
@@ -63,14 +76,10 @@ public class Ticket {
 
     @Override
     public String toString() {
-        // Uso obligatorio de StringBuilder para optimizar concatenaciones en cadenas de texto [cite: 21, 54]
         StringBuilder sb = new StringBuilder();
         sb.append("=== TICKET Nº ").append(numeroTicket).append(" ===\n");
-
-        // Lambda para recorrer y anexar de forma elegante
         productos.forEach(p -> sb.append("- ").append(p.getNombre())
                 .append(" : ").append(p.getPrecio()).append("€\n"));
-
         sb.append("---------------------\n");
         sb.append("TOTAL: ").append(total).append("€\n");
         if (!observaciones.isEmpty()) {

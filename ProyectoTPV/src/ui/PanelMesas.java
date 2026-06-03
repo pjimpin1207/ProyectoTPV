@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import modelo.EstadoMesa;
 import modelo.Mesa;
+import modelo.Ticket;
 
 public class PanelMesas extends JPanel {
 
@@ -32,8 +33,11 @@ public class PanelMesas extends JPanel {
             JOptionPane.showMessageDialog(this, "Mesa " + mesa.getNumero() + " abierta. Generando ticket...");
             // Aquí llamarías a tu ventana de añadir productos al ticket
         } else {
-            // Si ya está ocupada, simulamos que vamos a cobrar
-            new DialogoCobro(mesa, boton).setVisible(true);
+            // Simulamos la recuperación del ticket activo de esta mesa
+            Ticket ticketSimulado = new Ticket(mesa.getNumero());
+
+            // Ahora pasamos los 3 parámetros (Mesa, JButton y Ticket) a DialogoCobro
+            new DialogoCobro(mesa, boton, ticketSimulado).setVisible(true);
         }
     }
 }
