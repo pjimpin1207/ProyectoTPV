@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="objectdb-2.9.5">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/objectdb-2.9.5/objectdb-2.9.5/bin/objectdb-2.9.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
