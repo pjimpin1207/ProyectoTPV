@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionDB {
-    // Conexiones a la base de datos
     private static final String URL = "jdbc:mariadb://localhost:3306/tpv_restaurante";
     private static final String USER = "root";
     private static final String PASSWORD = "";

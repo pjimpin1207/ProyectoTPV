@@ -13,8 +13,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Usamos un JTabbedPane para poder cambiar entre la vista de mesas y la de administrador
         JTabbedPane pestañas = new JTabbedPane();
-        pestañas.addTab("Mesas / Comedor", new PanelMesas());
-        pestañas.addTab("Administración", new PanelAdministrador());
+        pestañas.addTab("Mesas / Comedor", new VentanaMesas(new java.util.Date()));
+        pestañas.addTab("Administración", new VentanaAdministrador());
 
         add(pestañas, BorderLayout.CENTER);
     }

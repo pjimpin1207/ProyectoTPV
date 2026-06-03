@@ -1,0 +1,20 @@
+=== TICKET MESA Nº 1 ===
+ATENDIDO POR: PABLO, DAVID
+--------------------------------
+- Bocadillo Calamares : 5,00€
+- Bocadillo Calamares : 5,00€
+- Patatas Bravas : 4,50€
+- Patatas Bravas : 4,50€
+- CUBATA : 7,00€
+- AGUA : 1,50€
+- AGUA : 1,50€
+- HELADO : 3,50€
+- Tarta de Queso : 3,50€
+- Patatas Bravas : 4,50€
+- Bocadillo Calamares : 5,00€
+- CUBATA : 7,00€
+- Refresco : 2,00€
+---------------------
+TOTAL: 54,50€
+
+¡Gracias por su visita!

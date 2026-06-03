@@ -2,50 +2,60 @@ package ui;
 
 import javax.swing.*;
 import java.awt.*;
-import modelo.EstadoMesa;
 import modelo.Mesa;
+import modelo.Ticket;
+import modelo.EstadoMesa;
 import dao.TicketDAO;
 import dao.TicketObjectDBDAO;
-import modelo.Ticket;
 
 public class DialogoCobro extends JDialog {
-
-    public DialogoCobro(Mesa mesa, JButton botonMesa, Ticket ticketActivo) {
-        setTitle("Cobrar Mesa " + mesa.getNumero());
-        setSize(300, 200);
-        setModal(true);
-        setLocationRelativeTo(null);
+    public DialogoCobro(JFrame parent, Mesa mesa, String camareroActual, Ticket ticketActivo) {
+        super(parent, "Cobro", true);
+        setSize(400, 300);
+        setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
 
-        JLabel lblTotal = new JLabel("Total a cobrar: " + ticketActivo.getTotal() + "€", SwingConstants.CENTER);
-        lblTotal.setFont(new Font("Arial", Font.BOLD, 18));
-        add(lblTotal, BorderLayout.CENTER);
+        JPanel panelCentro = new JPanel(new GridLayout(3, 1));
+        panelCentro.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JButton btnCobrar = new JButton("Cobrar y Liberar");
-        btnCobrar.addActionListener(e -> {
+        // ACTUALIZADO: Obtenemos toda la lista de camareros del ticket
+        JLabel lblInfo = new JLabel("MESA Nº " + mesa.getNumero() + " | " + ticketActivo.getNombresCamareros(), SwingConstants.CENTER);
+        lblInfo.setFont(new Font("Arial", Font.BOLD, 14)); // Letra un poco más pequeña por si son muchos
+
+        JLabel lblResumen = new JLabel(ticketActivo.getProductos().size() + " productos consumidos", SwingConstants.CENTER);
+        JLabel lblMonto = new JLabel("MONTO COBRADO: " + String.format("%.2f", ticketActivo.getTotal()) + "€", SwingConstants.CENTER);
+        lblMonto.setFont(new Font("Arial", Font.BOLD, 20));
+        lblMonto.setForeground(Color.RED);
+
+        panelCentro.add(lblInfo);
+        panelCentro.add(lblResumen);
+        panelCentro.add(lblMonto);
+        add(panelCentro, BorderLayout.CENTER);
+
+        JButton btnRegresar = new JButton("ACEPTAR Y REGRESAR");
+        btnRegresar.addActionListener(e -> {
             try {
-                // 1. Cambiar estados de negocio
                 mesa.cambiarEstado(EstadoMesa.PENDIENTE_PAGO);
                 ticketActivo.cobrar();
 
-                // 2. Persistencia en Base de Datos Relacional (MariaDB)
                 TicketDAO relacionalDAO = new TicketDAO();
                 relacionalDAO.guardarTicket(ticketActivo);
 
-                // 3. Persistencia en Base de Datos Orientada a Objetos (ObjectDB)
                 TicketObjectDBDAO oodbDAO = new TicketObjectDBDAO();
                 oodbDAO.guardarTicketObjeto(ticketActivo);
 
-                // 4. Liberación de la interfaz gráfica
+                mesa.cambiarEstado(EstadoMesa.OCUPADA);
                 mesa.liberarMesa();
-                botonMesa.setBackground(Color.GREEN);
 
-                JOptionPane.showMessageDialog(this, "Cobro registrado con éxito en ambos sistemas de datos.");
-                this.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error en el proceso de cobro: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error en BD: " + ex.getMessage());
             }
+
+            new VentanaMesas(new java.util.Date()).setVisible(true);
+            parent.dispose();
+            this.dispose();
         });
-        add(btnCobrar, BorderLayout.SOUTH);
+
+        add(btnRegresar, BorderLayout.SOUTH);
     }
 }

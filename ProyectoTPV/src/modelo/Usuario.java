@@ -15,28 +15,19 @@ public abstract class Usuario {
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-
-    // Simulación del método login [cite: 99]
-    public boolean login(String nombre, String password) {
-        return Objects.equals(this.nombre, nombre) && Objects.equals(this.password, password); // Null safety
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return id == usuario.id && Objects.equals(nombre, usuario.nombre); // Requisito Objects.equals
+        return id == usuario.id && Objects.equals(nombre, usuario.nombre);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, nombre);
-    }
+    public int hashCode() { return Objects.hash(id, nombre); }
 }

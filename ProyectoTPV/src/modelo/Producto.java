@@ -1,12 +1,21 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
-public class Producto {
+@Entity
+public class Producto implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
     private int id;
     private String nombre;
     private Categoria categoria;
     private float precio;
+
+    public Producto() {}
 
     public Producto(int id, String nombre, Categoria categoria, float precio) {
         this.id = id;
@@ -16,14 +25,8 @@ public class Producto {
     }
 
     public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-
     public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
     public Categoria getCategoria() { return categoria; }
-    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
-
     public float getPrecio() { return precio; }
     public void setPrecio(float precio) { this.precio = precio; }
 
@@ -36,7 +39,5 @@ public class Producto {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, nombre);
-    }
+    public int hashCode() { return Objects.hash(id, nombre); }
 }

@@ -2,49 +2,43 @@ package ui;
 
 import javax.swing.*;
 import java.awt.*;
-import dao.UsuarioDAO;
-import modelo.Usuario;
+import java.util.Date;
 
 public class VentanaLogin extends JFrame {
-    private JTextField txtUsuario;
-    private JPasswordField txtPassword;
-    private JButton btnLogin;
-
     public VentanaLogin() {
-        setTitle("Sistema TPV - Login");
-        setSize(300, 200);
+        setTitle("Bienvenido al Sistema TPV");
+        setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(3, 2, 10, 10));
+        setLayout(new BorderLayout(10, 10));
 
-        add(new JLabel("Usuario:"));
-        txtUsuario = new JTextField();
-        add(txtUsuario);
+        JLabel lblTitulo = new JLabel("BIENVENIDO AL SISTEMA TPV", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
+        add(lblTitulo, BorderLayout.NORTH);
 
-        add(new JLabel("Contraseña:"));
-        txtPassword = new JPasswordField();
-        add(txtPassword);
+        JPanel panelCentro = new JPanel(new GridLayout(2, 1, 10, 10));
+        panelCentro.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        btnLogin = new JButton("Entrar");
-        add(new JLabel()); // Espacio vacío
-        add(btnLogin);
+        SpinnerDateModel model = new SpinnerDateModel();
+        JSpinner spinnerFecha = new JSpinner(model);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerFecha, "dd / MM / yyyy");
+        spinnerFecha.setEditor(editor);
+        spinnerFecha.setFont(new Font("Arial", Font.PLAIN, 16));
 
-        btnLogin.addActionListener(e -> hacerLogin());
-    }
+        panelCentro.add(new JLabel("SELECCIONE UNA FECHA:", SwingConstants.CENTER));
+        panelCentro.add(spinnerFecha);
+        add(panelCentro, BorderLayout.CENTER);
 
-    private void hacerLogin() {
-        String user = txtUsuario.getText();
-        String pass = new String(txtPassword.getPassword());
+        JButton btnContinuar = new JButton("CONTINUAR --->");
+        btnContinuar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnContinuar.addActionListener(e -> {
+            Date fechaSeleccionada = (Date) spinnerFecha.getValue();
+            new VentanaMesas(fechaSeleccionada).setVisible(true);
+            this.dispose();
+        });
 
-        UsuarioDAO dao = new UsuarioDAO();
-        Usuario validado = dao.validarLogin(user, pass);
-
-        if (validado != null) {
-            JOptionPane.showMessageDialog(this, "Bienvenido " + validado.getNombre());
-            new VentanaPrincipal().setVisible(true);
-            this.dispose(); // Cierra el login
-        } else {
-            JOptionPane.showMessageDialog(this, "Credenciales incorrectas", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        JPanel panelSur = new JPanel();
+        panelSur.add(btnContinuar);
+        add(panelSur, BorderLayout.SOUTH);
     }
 }

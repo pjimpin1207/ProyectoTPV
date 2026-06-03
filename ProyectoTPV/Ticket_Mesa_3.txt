@@ -1,0 +1,13 @@
+=== SISTEMA TPV - RECIBO ===
+MESA Nº 3 | ATENDIDO POR: CAMARERO 4
+--------------------------------
+=== TICKET Nº 3 ===
+- Cerveza : 2,50€
+- Patatas Bravas : 4,50€
+- CUBATA : 7,00€
+- Tarta de Queso : 3,50€
+- Agua : 1,00€
+---------------------
+TOTAL: 18,50€
+
+¡Gracias por su visita!

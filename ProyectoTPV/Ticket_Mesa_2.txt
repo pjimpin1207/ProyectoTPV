@@ -1,0 +1,10 @@
+=== SISTEMA TPV - RECIBO ===
+MESA Nº 2 | ATENDIDO POR: CAMARERO 1
+--------------------------------
+=== TICKET Nº 2 ===
+- Patatas Bravas : 4.5€
+- Cerveza : 2.5€
+---------------------
+TOTAL: 7.0€
+
+¡Gracias por su visita!
