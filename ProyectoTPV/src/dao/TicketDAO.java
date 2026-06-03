@@ -1,28 +1,22 @@
 package dao;
-
 import java.sql.*;
-import modelo.Camarero;
-import modelo.Usuario;
+import modelo.Ticket;
 
-public class UsuarioDAO {
+public class TicketDAO {
 
-    public Usuario validarLogin(String nombre, String password) {
-        String sql = "SELECT * FROM usuarios WHERE nombre = ? AND password = ?";
+    public void guardarTicket(Ticket t) {
+        String sql = "INSERT INTO tickets (total, observaciones) VALUES (?, ?)";
 
         try (Connection conn = ConexionDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setString(1, nombre);
-            pstmt.setString(2, password);
-            ResultSet rs = pstmt.executeQuery();
+            pstmt.setFloat(1, t.getTotal());
+            pstmt.setString(2, t.getObservaciones());
+            pstmt.executeUpdate();
+            System.out.println("Ticket registrado en la base de datos.");
 
-            if (rs.next()) {
-                // Por simplicidad, retornamos un Camarero genérico si el login es correcto
-                return new Camarero(rs.getInt("id"), rs.getString("nombre"), rs.getString("password"));
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
     }
 }
