@@ -57,7 +57,7 @@ public class Ticket {
         return this.total / personas;
     }
 
-    public void cobrar() { 
+    public void cobrar() {
         System.out.println("Ticket Nº " + numeroTicket + " cobrado con un total de: " + this.total + "€");
     }
 

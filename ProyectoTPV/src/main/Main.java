@@ -12,7 +12,7 @@ public class Main {
 
         // Instanciación del controlador
         SistemaTPV tpv = new SistemaTPV();
-        iniciarSesion(new Date());
+        tpv.iniciarSesion(new Date());
 
         // crear ticket
         Ticket testTicket = new Ticket(1);
@@ -21,7 +21,7 @@ public class Main {
 
         System.out.println(testTicket);
 
-        registrarTicket(testTicket);
-        mostrarResumenCaja();
+        tpv.registrarTicket(testTicket);
+        tpv.mostrarResumenCaja();
     }
 }
