@@ -42,17 +42,22 @@ public class VentanaMesas extends JFrame {
         panelCuadricula.add(btnAdmin);
 
         for (int i = 1; i <= 11; i++) {
-            // NUEVO: Pedimos la mesa al Gestor en lugar de crearla
+            // Pedimos la mesa al Gestor en lugar de crearla
             Mesa mesaModelo = GestorMesas.getInstancia().getMesa(i);
 
-            JButton btnMesa = new JButton("Mesa " + String.format("%03d", i));
+            // Cambiado para que se llame "Mesa 1", "Mesa 2"...
+            JButton btnMesa = new JButton("Mesa " + i);
             btnMesa.setFont(new Font("Arial", Font.BOLD, 14));
 
-            // NUEVO: Pinta en Rojo si está ocupada, o Verde si está libre
+            // Control de colores según el estado de la mesa
             if (mesaModelo.getEstado() == EstadoMesa.LIBRE) {
-                btnMesa.setBackground(Color.GREEN);
+                // Azul clarito para mesas libres
+                btnMesa.setBackground(Color.decode("#87CEFA"));
+                btnMesa.setForeground(Color.BLACK); // Letra negra para contrastar con el azul claro
             } else {
-                btnMesa.setBackground(Color.RED);
+                // Rojo oscuro para mesas ocupadas
+                btnMesa.setBackground(Color.decode("#D32F2F"));
+                btnMesa.setForeground(Color.WHITE); // Letra blanca para contrastar con el rojo oscuro
             }
 
             btnMesa.addActionListener(e -> new DialogoSeleccionCamarero(this, mesaModelo).setVisible(true));

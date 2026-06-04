@@ -1,13 +1,15 @@
-=== TICKET MESA Nº 1 ===
-ATENDIDO POR: PABLO
+=== TICKET MESA Nº 6 ===
+ATENDIDO POR: DAVID
 --------------------------------
 - Bocadillo Calamares : 5,00€
 - Patatas Bravas : 4,50€
 - CUBATA : 7,00€
-- Refresco : 2,00€
-- TORTILLA DE PATATAS : 3,50€
 - AGUA : 1,50€
+- HELADO : 3,50€
+- Tarta de Queso : 3,50€
+- Patatas Bravas : 4,50€
+- Bocadillo Calamares : 5,00€
 ---------------------
-TOTAL: 23,50€
+TOTAL: 34,50€
 
 ¡Gracias por su visita!

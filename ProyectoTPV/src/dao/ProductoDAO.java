@@ -26,7 +26,6 @@ public class ProductoDAO {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // NUEVO MÉTODO: Para poder cambiar el nombre del producto
     public void modificarNombreProducto(String nombreViejo, String nombreNuevo) {
         String sql = "UPDATE productos SET nombre = ? WHERE nombre = ?";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {

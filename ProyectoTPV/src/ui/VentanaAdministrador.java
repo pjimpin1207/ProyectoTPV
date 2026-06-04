@@ -128,210 +128,46 @@ public class VentanaAdministrador extends JFrame {
     }
 
     private void realizarCierreDeCaja() {
-
         TicketObjectDBDAO tDao = new TicketObjectDBDAO();
         List<Ticket> ticketsHoy = tDao.obtenerTicketsHoy();
 
         if (ticketsHoy.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "No hay tickets registrados hoy.",
-                    "Cierre de caja",
+                    "No hay tickets registrados en el día de hoy.",
+                    "Cierre de Caja",
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         float totalCaja = 0;
-        Map<String, Integer> conteoProductos = new HashMap<>();
-        Set<String> trabajadoresHoy = new TreeSet<>();
 
-
+        // Sumamos el total de todos los tickets del día DIRECTAMENTE
+        // (Hemos quitado el 'if' problemático que daba 0)
         for (Ticket t : ticketsHoy) {
-
-            if (t.getProductos() != null) {
-
-                totalCaja += t.getTotal();
-
-                for (modelo.Producto p : t.getProductos()) {
-
-                    conteoProductos.put(
-                            p.getNombre(),
-                            conteoProductos.getOrDefault(p.getNombre(), 0) + 1
-                    );
-                }
-            }
-
-
-            if (t.getNombresCamareros() != null &&
-                    !t.getNombresCamareros().equals("Ninguno")) {
-
-                String[] nombres = t.getNombresCamareros().split(", ");
-
-                for (String nombre : nombres) {
-                    trabajadoresHoy.add(nombre.trim());
-                }
-            }
+            totalCaja += t.getTotal();
         }
 
+        // --- GUARDADO EN ARCHIVO HISTÓRICO (MODO APPEND) ---
+        String ruta = System.getProperty("user.home") + java.io.File.separator + "Desktop" + java.io.File.separator;
+        String nombreFichero = ruta + "Historial_Cierres_Caja.txt";
 
-        List<Map.Entry<String, Integer>> ranking =
-                new ArrayList<>(conteoProductos.entrySet());
+        try (java.io.FileWriter fw = new java.io.FileWriter(nombreFichero, true)) {
+            String fechaActual = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date());
 
-        ranking.sort((a, b) ->
-                b.getValue().compareTo(a.getValue()));
+            fw.write("=======================================\n");
+            fw.write("CIERRE DE CAJA - " + fechaActual + "\n");
+            fw.write("TOTAL FACTURADO: " + String.format("%.2f", totalCaja) + "€\n");
+            fw.write("Tickets procesados: " + ticketsHoy.size() + "\n");
+            fw.write("=======================================\n\n");
 
-
-        // PANEL PRINCIPAL SWING
-
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-
-
-        JLabel titulo = new JLabel(
-                "RESUMEN DE CAJA DIARIO",
-                SwingConstants.CENTER
-        );
-
-        titulo.setFont(new Font("Arial", Font.BOLD, 18));
-
-
-        JTextArea area = new JTextArea();
-        area.setEditable(false);
-        area.setFont(new Font("Monospaced", Font.PLAIN, 13));
-
-
-        area.append("---------------------------------------\n");
-        area.append("          RESUMEN DE CAJA\n");
-        area.append("---------------------------------------\n\n");
-
-        area.append("TOTAL GANADO HOY: "
-                + String.format("%.2f", totalCaja)
-                + " €\n\n");
-
-
-        area.append("PERSONAL EN TURNO:\n");
-
-        if (trabajadoresHoy.isEmpty()) {
-
-            area.append("- Sin asignar\n");
-
-        } else {
-
-            for (String empleado : trabajadoresHoy) {
-                area.append("- " + empleado + "\n");
-            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al escribir en el histórico: " + ex.getMessage(), "Error de Archivo", JOptionPane.ERROR_MESSAGE);
         }
 
-
-        area.append("\nPRODUCTOS VENDIDOS:\n");
-
-
-        for (Map.Entry<String, Integer> e : ranking) {
-
-            area.append(
-                    "- " + e.getKey()
-                            + ": "
-                            + e.getValue()
-                            + " uds\n"
-            );
-        }
-
-
-        JScrollPane scroll = new JScrollPane(area);
-
-
-        JButton btnExportar = new JButton("Exportar TXT");
-        JButton btnCerrar = new JButton("Cerrar");
-
-
-        JPanel botones = new JPanel();
-
-        botones.add(btnExportar);
-        botones.add(btnCerrar);
-
-
-        panel.add(titulo, BorderLayout.NORTH);
-        panel.add(scroll, BorderLayout.CENTER);
-        panel.add(botones, BorderLayout.SOUTH);
-
-
-        JDialog ventana = new JDialog(
-                this,
-                "Cierre de caja",
-                true
-        );
-
-
-        ventana.setSize(500, 450);
-        ventana.setLocationRelativeTo(this);
-
-
-        ventana.add(panel);
-
-
-        // EXPORTAR
-
-        btnExportar.addActionListener(e -> {
-
-            String ruta =
-                    System.getProperty("user.home")
-                            + File.separator
-                            + "Desktop"
-                            + File.separator;
-
-
-            String fecha =
-                    new SimpleDateFormat("yyyyMMdd")
-                            .format(new Date());
-
-
-            String fichero =
-                    ruta + "Cierre_" + fecha + ".txt";
-
-
-            try (FileWriter fw = new FileWriter(fichero)) {
-
-
-                fw.write(area.getText());
-
-
-                fw.write(
-                        "\n---------------------------------------\n"
-                );
-
-                fw.write(
-                        "DESGLOSE DE TICKETS\n"
-                );
-
-
-                for (Ticket t : ticketsHoy) {
-
-                    fw.write("\n");
-                    fw.write(t.toString());
-
-                }
-
-
-                JOptionPane.showMessageDialog(
-                        ventana,
-                        "Informe exportado correctamente:\n"
-                                + fichero
-                );
-
-
-            } catch (Exception ex) {
-
-                JOptionPane.showMessageDialog(
-                        ventana,
-                        "Error al exportar: "
-                                + ex.getMessage()
-                );
-            }
-
-        });
-
-
-        btnCerrar.addActionListener(e -> ventana.dispose());
-
-
-        ventana.setVisible(true);
+        // --- AVISO RÁPIDO EN PANTALLA ---
+        JOptionPane.showMessageDialog(this,
+                "TOTAL FACTURADO HOY: " + String.format("%.2f", totalCaja) + "€\n\n(Registro añadido a Historial_Cierres_Caja.txt en tu Escritorio)",
+                "Resumen de Caja Diario",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 }

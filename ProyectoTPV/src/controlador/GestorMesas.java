@@ -10,7 +10,6 @@ public class GestorMesas {
 
     private GestorMesas() {
         mapaMesas = new HashMap<>();
-        // Inicializamos las 11 mesas de la sala una única vez
         for (int i = 1; i <= 11; i++) {
             mapaMesas.put(i, new Mesa(i));
         }
