@@ -78,3 +78,121 @@ Clase base con:
 - Lógica real (no solo guardar datos)  
 - Proyecto bastante completo para DAW  
 ---
+
+
+`mermaid`
+classDiagram
+    %% Paquete modelo
+    class Usuario {
+        <<abstract>>
+        -int id
+        -String nombre
+        -String password
+        +getId() int
+        +getNombre() String
+    }
+    
+    class Administrador
+    class Camarero
+    Usuario <|-- Administrador : hereda
+    Usuario <|-- Camarero : hereda
+
+    class Categoria {
+        <<enumeration>>
+        BEBIDA
+        COMIDA
+        POSTRE
+    }
+
+    class Producto {
+        -int id
+        -String nombre
+        -float precio
+        +getId() int
+        +getNombre() String
+        +getPrecio() float
+    }
+    Producto --> Categoria : tiene
+
+    class EstadoMesa {
+        <<enumeration>>
+        LIBRE
+        OCUPADA
+        PENDIENTE_PAGO
+        RESERVADA
+    }
+
+    class Ticket {
+        -Long idBD
+        -int numeroTicket
+        -float total
+        -String observaciones
+        -Date fecha
+        -HashSet~String~ camareros
+        -ArrayList~Producto~ productos
+        +añadirProducto(Producto)
+        +añadirCamarero(String)
+        +calcularTotal() float
+        +cobrar()
+    }
+    Ticket o-- Producto : contiene (0..n)
+
+    class Mesa {
+        -int numero
+        -Ticket ticketActivo
+        +liberarMesa()
+        +cambiarEstado(EstadoMesa)
+    }
+    Mesa --> EstadoMesa : tiene estado
+    Mesa *-- Ticket : gestiona 1
+
+    %% Paquete controlador
+    class GestorMesas {
+        <<singleton>>
+        -static GestorMesas instancia
+        -Map~Integer, Mesa~ mapaMesas
+        -GestorMesas()
+        +getInstancia() GestorMesas$
+        +getMesa(numero) Mesa
+    }
+    GestorMesas *-- Mesa : contiene 11
+
+    %% Paquete dao
+    class ProductoDAO {
+        +insertarProducto(Producto)
+        +modificarProducto(String, float)
+        +modificarNombreProducto(String, String)
+        +eliminarProducto(String)
+        +obtenerTodos() List~Producto~
+    }
+    class UsuarioDAO {
+        +validarLogin(String, String) Usuario
+        +insertarCamarero(String)
+        +eliminarCamarero(String)
+        +obtenerNombresCamareros() List~String~
+    }
+    class TicketDAO {
+        +guardarTicket(Ticket)
+    }
+    class TicketObjectDBDAO {
+        +guardarTicketObjeto(Ticket)
+        +obtenerTicketsHoy() List~Ticket~
+    }
+    
+    ProductoDAO ..> Producto : usa
+    UsuarioDAO ..> Usuario : usa
+    TicketDAO ..> Ticket : usa
+    TicketObjectDBDAO ..> Ticket : usa
+
+    %% Relaciones UI principales (Simplificadas)
+    class VentanaComanda
+    class VentanaAdministrador
+    class VentanaMesas
+    class DialogoCobro
+
+    VentanaMesas ..> GestorMesas : consulta
+    VentanaComanda ..> Ticket : modifica
+    VentanaComanda ..> ProductoDAO : lee carta
+    DialogoCobro ..> TicketDAO : guarda MariaDB
+    DialogoCobro ..> TicketObjectDBDAO : guarda ObjectDB
+    VentanaAdministrador ..> TicketObjectDBDAO : lee cierre
