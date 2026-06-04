@@ -1,7 +1,7 @@
 package ui;
 
-import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.Date;
 import modelo.Mesa;
 import modelo.Usuario;
@@ -9,60 +9,61 @@ import modelo.EstadoMesa;
 import dao.UsuarioDAO;
 import controlador.GestorMesas;
 
-public class VentanaMesas extends JFrame {
+public class VentanaMesas extends Frame {
     public VentanaMesas(Date fechaSesion) {
-        setTitle("Sistema TPV - Sala (Fecha: " + fechaSesion.toString() + ")");
+        setTitle("Sistema TPV - Sala");
         setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        JPanel panelCuadricula = new JPanel(new GridLayout(3, 4, 15, 15));
-        panelCuadricula.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { System.exit(0); }
+        });
 
-        JButton btnAdmin = new JButton("ADMIN");
+        Panel panelCuadricula = new Panel(new GridLayout(3, 4, 15, 15));
+
+        Button btnAdmin = new Button("ADMIN");
         btnAdmin.setBackground(Color.DARK_GRAY);
         btnAdmin.setForeground(Color.WHITE);
         btnAdmin.setFont(new Font("Arial", Font.BOLD, 14));
         btnAdmin.addActionListener(e -> {
-            JPasswordField pf = new JPasswordField();
-            int okCxl = JOptionPane.showConfirmDialog(this, pf, "Contraseña de Administrador (admin / 1234):", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            if (okCxl == JOptionPane.OK_OPTION) {
-                String password = new String(pf.getPassword());
+            String pass = MensajesAWT.pedirPassword(this, "Contraseña (admin / 1234):");
+            if (pass != null) {
                 UsuarioDAO dao = new UsuarioDAO();
-                Usuario admin = dao.validarLogin("admin", password);
+                Usuario admin = dao.validarLogin("admin", pass);
 
                 if (admin != null) {
                     new VentanaAdministrador().setVisible(true);
                     this.dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Contraseña incorrecta.", "Error", JOptionPane.ERROR_MESSAGE);
+                    MensajesAWT.mostrarMensaje(this, "Contraseña incorrecta.", "Error");
                 }
             }
         });
         panelCuadricula.add(btnAdmin);
 
         for (int i = 1; i <= 11; i++) {
-            // Pedimos la mesa al Gestor en lugar de crearla
             Mesa mesaModelo = GestorMesas.getInstancia().getMesa(i);
-
-            // Cambiado para que se llame "Mesa 1", "Mesa 2"...
-            JButton btnMesa = new JButton("Mesa " + i);
+            Button btnMesa = new Button("Mesa " + i);
             btnMesa.setFont(new Font("Arial", Font.BOLD, 14));
 
-            // Control de colores según el estado de la mesa
             if (mesaModelo.getEstado() == EstadoMesa.LIBRE) {
-                // Azul clarito para mesas libres
                 btnMesa.setBackground(Color.decode("#87CEFA"));
-                btnMesa.setForeground(Color.BLACK); // Letra negra para contrastar con el azul claro
+                btnMesa.setForeground(Color.BLACK);
             } else {
-                // Rojo oscuro para mesas ocupadas
                 btnMesa.setBackground(Color.decode("#D32F2F"));
-                btnMesa.setForeground(Color.WHITE); // Letra blanca para contrastar con el rojo oscuro
+                btnMesa.setForeground(Color.WHITE);
             }
 
-            btnMesa.addActionListener(e -> new DialogoSeleccionCamarero(this, mesaModelo).setVisible(true));
+            btnMesa.addActionListener(e -> {
+                DialogoSeleccionCamarero d = new DialogoSeleccionCamarero(this, mesaModelo);
+                d.setVisible(true);
+            });
             panelCuadricula.add(btnMesa);
         }
-        add(panelCuadricula, BorderLayout.CENTER);
+
+        Panel margen = new Panel(new BorderLayout());
+        margen.add(panelCuadricula, BorderLayout.CENTER);
+        add(margen, BorderLayout.CENTER);
     }
 }

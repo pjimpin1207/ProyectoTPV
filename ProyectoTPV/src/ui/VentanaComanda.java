@@ -1,10 +1,8 @@
 package ui;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.*;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,10 +12,9 @@ import modelo.Ticket;
 import modelo.Producto;
 import dao.ProductoDAO;
 
-public class VentanaComanda extends JFrame {
-    private JTable tablaTicket;
-    private DefaultTableModel modeloTabla;
-    private JLabel lblTotal;
+public class VentanaComanda extends Frame {
+    private java.awt.List listaTicketVisual; // Sustituto del JTable
+    private Label lblTotal;
     private Ticket ticket;
     private Mesa mesa;
     private List<List<Producto>> lineasVisuales;
@@ -26,108 +23,76 @@ public class VentanaComanda extends JFrame {
         this.mesa = mesa;
         this.ticket = ticket;
         this.lineasVisuales = new ArrayList<>();
-
-        // NUEVO: Registramos al camarero actual en la cuenta de la mesa
         this.ticket.añadirCamarero(camarero);
 
-        // El título muestra todos los camareros que han pasado por la mesa
-        setTitle("Mesa Nº " + mesa.getNumero() + " - Atendida por: " + ticket.getNombresCamareros());
+        setTitle("Mesa Nº " + mesa.getNumero() + " - " + ticket.getNombresCamareros());
         setSize(900, 600);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JPanel panelIzquierdo = new JPanel(new BorderLayout());
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { dispose(); }
+        });
+
+        Panel panelIzquierdo = new Panel(new BorderLayout());
         panelIzquierdo.setPreferredSize(new Dimension(400, 0));
-        panelIzquierdo.setBorder(BorderFactory.createTitledBorder("PRODUCTOS DEL TICKET"));
+        panelIzquierdo.add(new Label("PRODUCTOS DEL TICKET", Label.CENTER), BorderLayout.NORTH);
 
-        String[] columnas = {"Cant.", "Producto", "P. Unit", "Total"};
-        modeloTabla = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        };
-
-        tablaTicket = new JTable(modeloTabla);
-        tablaTicket.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tablaTicket.setFont(new Font("Arial", Font.PLAIN, 14));
-        tablaTicket.setRowHeight(25);
-        tablaTicket.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tablaTicket.getColumnModel().getColumn(1).setPreferredWidth(150);
-
-        panelIzquierdo.add(new JScrollPane(tablaTicket), BorderLayout.CENTER);
+        listaTicketVisual = new java.awt.List();
+        listaTicketVisual.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        panelIzquierdo.add(listaTicketVisual, BorderLayout.CENTER);
         add(panelIzquierdo, BorderLayout.WEST);
 
-        JPanel panelProductos = new JPanel(new GridLayout(0, 3, 10, 10));
-        panelProductos.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+        Panel panelProductos = new Panel(new GridLayout(0, 3, 5, 5));
         ProductoDAO dao = new ProductoDAO();
         List<Producto> carta = dao.obtenerTodos();
 
         for (Producto p : carta) {
-            JButton btnProd = new JButton(p.getNombre());
+            Button btnProd = new Button(p.getNombre());
             btnProd.addActionListener(e -> {
                 Producto prodClonado = new Producto(p.getId(), p.getNombre(), p.getCategoria(), p.getPrecio());
-                ticket.añadirProducto(prodClonado);
+                this.ticket.añadirProducto(prodClonado);
                 actualizarResumen();
             });
             panelProductos.add(btnProd);
         }
-        add(new JScrollPane(panelProductos), BorderLayout.CENTER);
 
-        JPanel panelSur = new JPanel(new BorderLayout());
-        JPanel panelControles = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ScrollPane scrollProds = new ScrollPane();
+        scrollProds.add(panelProductos);
+        add(scrollProds, BorderLayout.CENTER);
 
-        JButton btnTicket = new JButton("TICKET");
-        JButton btnModificar = new JButton("MODIFICAR");
-        JButton btnCobrar = new JButton("COBRAR");
-        JButton btnSalir = new JButton("SALIR");
+        Panel panelSur = new Panel(new BorderLayout());
+        Panel panelControles = new Panel(new FlowLayout(FlowLayout.LEFT));
 
-        // ACTUALIZADO: El ticket impreso ya contiene todos los datos y camareros
-        btnTicket.addActionListener(e -> {
-            if (ticket.getProductos().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "El ticket está vacío.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            try {
-                String nombreFichero = "Ticket_Mesa_" + mesa.getNumero() + ".txt";
-                FileWriter fw = new FileWriter(nombreFichero);
-                fw.write(ticket.toString()); // Escribe todo de una vez
-                fw.write("\n¡Gracias por su visita!");
-                fw.close();
-                JOptionPane.showMessageDialog(this, "Ticket impreso correctamente en:\n" + nombreFichero);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error al generar el archivo.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        Button btnTicket = new Button("TICKET");
+        Button btnModificar = new Button("MODIFICAR");
+        Button btnCobrar = new Button("COBRAR");
+        Button btnSalir = new Button("SALIR");
 
         btnModificar.addActionListener(e -> {
-            int filaSel = tablaTicket.getSelectedRow();
+            int filaSel = listaTicketVisual.getSelectedIndex();
             if (filaSel != -1) {
                 List<Producto> productosLinea = lineasVisuales.get(filaSel);
-                Producto prodReferencia = productosLinea.get(0);
+                Producto prodRef = productosLinea.get(0);
 
-                JTextField txtCantidad = new JTextField(String.valueOf(productosLinea.size()));
-                JTextField txtPrecio = new JTextField(String.valueOf(prodReferencia.getPrecio()));
-
-                Object[] mensaje = { "Nueva cantidad:", txtCantidad, "Nuevo precio unitario (€):", txtPrecio };
-
-                int opcion = JOptionPane.showConfirmDialog(this, mensaje, "Modificar " + prodReferencia.getNombre(), JOptionPane.OK_CANCEL_OPTION);
-                if (opcion == JOptionPane.OK_OPTION) {
+                String nuevaCantStr = MensajesAWT.pedirInput(this, "Nueva cantidad para " + prodRef.getNombre() + ":", "Modificar Cantidad", String.valueOf(productosLinea.size()));
+                if(nuevaCantStr != null) {
                     try {
-                        int nuevaCantidad = Integer.parseInt(txtCantidad.getText());
-                        float nuevoPrecio = Float.parseFloat(txtPrecio.getText().replace(",", "."));
-                        ticket.getProductos().removeAll(productosLinea);
-                        for (int i = 0; i < nuevaCantidad; i++) {
-                            ticket.añadirProducto(new Producto(prodReferencia.getId(), prodReferencia.getNombre(), prodReferencia.getCategoria(), nuevoPrecio));
+                        int cant = Integer.parseInt(nuevaCantStr);
+                        String nuevoPrecioStr = MensajesAWT.pedirInput(this, "Nuevo precio unitario (€):", "Modificar Precio", String.valueOf(prodRef.getPrecio()));
+                        if(nuevoPrecioStr != null) {
+                            float precio = Float.parseFloat(nuevoPrecioStr.replace(",", "."));
+                            this.ticket.getProductos().removeAll(productosLinea);
+                            for (int i = 0; i < cant; i++) {
+                                this.ticket.añadirProducto(new Producto(prodRef.getId(), prodRef.getNombre(), prodRef.getCategoria(), precio));
+                            }
+                            this.ticket.calcularTotal();
+                            actualizarResumen();
                         }
-                        ticket.calcularTotal();
-                        actualizarResumen();
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(this, "Introduce valores numéricos correctos.");
-                    }
+                    } catch (Exception ex) { MensajesAWT.mostrarMensaje(this, "Número inválido.", "Error"); }
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Selecciona un producto de la tabla.", "Atención", JOptionPane.WARNING_MESSAGE);
+                MensajesAWT.mostrarMensaje(this, "Selecciona un producto de la lista primero.", "Atención");
             }
         });
 
@@ -137,7 +102,7 @@ public class VentanaComanda extends JFrame {
         });
 
         btnCobrar.addActionListener(e -> {
-            new DialogoCobro(this, mesa, camarero, ticket).setVisible(true);
+            new DialogoCobro(this, mesa, camarero, this.ticket).setVisible(true);
         });
 
         panelControles.add(btnTicket);
@@ -145,9 +110,8 @@ public class VentanaComanda extends JFrame {
         panelControles.add(btnCobrar);
         panelControles.add(btnSalir);
 
-        lblTotal = new JLabel("TOTAL: 0.00€  ");
+        lblTotal = new Label("TOTAL: 0.00€  ", Label.RIGHT);
         lblTotal.setFont(new Font("Arial", Font.BOLD, 24));
-        lblTotal.setHorizontalAlignment(SwingConstants.RIGHT);
 
         panelSur.add(panelControles, BorderLayout.WEST);
         panelSur.add(lblTotal, BorderLayout.EAST);
@@ -157,14 +121,11 @@ public class VentanaComanda extends JFrame {
     }
 
     private void actualizarResumen() {
-        modeloTabla.setRowCount(0);
+        listaTicketVisual.removeAll();
         lineasVisuales.clear();
 
-        if (ticket.getProductos().isEmpty()) {
-            mesa.cambiarEstado(modelo.EstadoMesa.LIBRE);
-        } else {
-            mesa.cambiarEstado(modelo.EstadoMesa.OCUPADA);
-        }
+        if (ticket.getProductos().isEmpty()) { mesa.cambiarEstado(modelo.EstadoMesa.LIBRE); }
+        else { mesa.cambiarEstado(modelo.EstadoMesa.OCUPADA); }
 
         Map<String, List<Producto>> agrupados = new LinkedHashMap<>();
         for (Producto p : ticket.getProductos()) {
@@ -174,16 +135,12 @@ public class VentanaComanda extends JFrame {
 
         for (List<Producto> lista : agrupados.values()) {
             lineasVisuales.add(lista);
-            int cantidad = lista.size();
-            Producto referencia = lista.get(0);
-            float totalLinea = cantidad * referencia.getPrecio();
+            int cant = lista.size();
+            Producto ref = lista.get(0);
 
-            modeloTabla.addRow(new Object[]{
-                    cantidad,
-                    referencia.getNombre(),
-                    String.format("%.2f €", referencia.getPrecio()),
-                    String.format("%.2f €", totalLinea)
-            });
+            // Texto formateado para la lista de AWT
+            String textoLinea = cant + "x " + ref.getNombre() + " | " + String.format("%.2f€", ref.getPrecio()) + " | Total: " + String.format("%.2f€", cant * ref.getPrecio());
+            listaTicketVisual.add(textoLinea);
         }
         lblTotal.setText("TOTAL: " + String.format("%.2f", ticket.getTotal()) + "€  ");
     }
