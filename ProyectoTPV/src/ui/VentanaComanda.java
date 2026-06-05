@@ -40,7 +40,6 @@ public class VentanaComanda extends Frame {
         panelIzquierdo.add(new Label("PRODUCTOS DEL TICKET", Label.CENTER), BorderLayout.NORTH);
 
         listaTicketVisual = new java.awt.List();
-        // Usamos Monospaced para poder simular una tabla
         listaTicketVisual.setFont(new Font("Monospaced", Font.PLAIN, 14));
         panelIzquierdo.add(listaTicketVisual, BorderLayout.CENTER);
         add(panelIzquierdo, BorderLayout.WEST);
@@ -88,32 +87,55 @@ public class VentanaComanda extends Frame {
             }
         });
 
+        // --- NUEVA LÓGICA DEL BOTÓN MODIFICAR ---
         btnModificar.addActionListener(e -> {
-            // Restamos 2 porque las dos primeras líneas de la lista son de cabecera visual
-            int filaSel = listaTicketVisual.getSelectedIndex() - 2;
+            int filaSel = listaTicketVisual.getSelectedIndex() - 2; // Restamos la cabecera
 
             if (filaSel >= 0 && filaSel < lineasVisuales.size()) {
                 List<Producto> productosLinea = lineasVisuales.get(filaSel);
                 Producto prodRef = productosLinea.get(0);
+                int cantidadActual = productosLinea.size();
 
-                String nuevaCantStr = MensajesAWT.pedirInput(this, "Nueva cantidad para " + prodRef.getNombre() + ":", "Modificar Cantidad", String.valueOf(productosLinea.size()));
-                if(nuevaCantStr != null) {
-                    try {
-                        int cant = Integer.parseInt(nuevaCantStr);
-                        String nuevoPrecioStr = MensajesAWT.pedirInput(this, "Nuevo precio unitario (€):", "Modificar Precio", String.valueOf(prodRef.getPrecio()));
-                        if(nuevoPrecioStr != null) {
-                            float precio = Float.parseFloat(nuevoPrecioStr.replace(",", "."));
+                String[] opciones = {"Modificar Cantidad", "Modificar Precio", "Eliminar de la comanda"};
+                String eleccion = MensajesAWT.pedirOpcion(this, "¿Qué deseas hacer con " + prodRef.getNombre() + "?", "Opciones", opciones);
+
+                if ("Modificar Cantidad".equals(eleccion)) {
+                    String nuevaCantStr = MensajesAWT.pedirInput(this, "Nueva cantidad para " + prodRef.getNombre() + ":", "Cantidad", String.valueOf(cantidadActual));
+                    if(nuevaCantStr != null) {
+                        try {
+                            int cant = Integer.parseInt(nuevaCantStr);
+                            if (cant <= 0) { MensajesAWT.mostrarMensaje(this, "Cantidad no válida.", "Error"); return; }
+
                             this.ticket.getProductos().removeAll(productosLinea);
                             for (int i = 0; i < cant; i++) {
+                                this.ticket.añadirProducto(new Producto(prodRef.getId(), prodRef.getNombre(), prodRef.getCategoria(), prodRef.getPrecio()));
+                            }
+                            this.ticket.calcularTotal();
+                            actualizarResumen();
+                        } catch (Exception ex) { MensajesAWT.mostrarMensaje(this, "Número inválido.", "Error"); }
+                    }
+                } else if ("Modificar Precio".equals(eleccion)) {
+                    String nuevoPrecioStr = MensajesAWT.pedirInput(this, "Nuevo precio unitario (€):", "Precio", String.valueOf(prodRef.getPrecio()));
+                    if(nuevoPrecioStr != null) {
+                        try {
+                            float precio = Float.parseFloat(nuevoPrecioStr.replace(",", "."));
+                            this.ticket.getProductos().removeAll(productosLinea);
+                            for (int i = 0; i < cantidadActual; i++) {
                                 this.ticket.añadirProducto(new Producto(prodRef.getId(), prodRef.getNombre(), prodRef.getCategoria(), precio));
                             }
                             this.ticket.calcularTotal();
                             actualizarResumen();
-                        }
-                    } catch (Exception ex) { MensajesAWT.mostrarMensaje(this, "Número inválido.", "Error"); }
+                        } catch (Exception ex) { MensajesAWT.mostrarMensaje(this, "Número inválido.", "Error"); }
+                    }
+                } else if ("Eliminar de la comanda".equals(eleccion)) {
+                    if (MensajesAWT.pedirConfirmacion(this, "¿Seguro que deseas eliminar " + prodRef.getNombre() + " del ticket?", "Eliminar Producto")) {
+                        this.ticket.getProductos().removeAll(productosLinea);
+                        this.ticket.calcularTotal();
+                        actualizarResumen();
+                    }
                 }
             } else {
-                MensajesAWT.mostrarMensaje(this, "Selecciona un producto válido de la lista primero.", "Atención");
+                MensajesAWT.mostrarMensaje(this, "Selecciona un producto de la lista primero.", "Atención");
             }
         });
 
@@ -158,7 +180,6 @@ public class VentanaComanda extends Frame {
             agrupados.computeIfAbsent(clave, k -> new ArrayList<>()).add(p);
         }
 
-        // Falsa tabla creada con espacios
         listaTicketVisual.add(String.format("%-5s | %-15s | %-8s | %-8s", "CANT", "PRODUCTO", "P.UNIT", "TOTAL"));
         listaTicketVisual.add("--------------------------------------------------");
 

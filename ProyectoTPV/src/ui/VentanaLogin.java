@@ -2,6 +2,7 @@ package ui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class VentanaLogin extends Frame {
@@ -20,11 +21,14 @@ public class VentanaLogin extends Frame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
         add(lblTitulo, BorderLayout.NORTH);
 
-        Panel panelCentro = new Panel(new GridLayout(2, 1, 10, 10));
-        panelCentro.add(new Label("SISTEMA INICIADO:", Label.CENTER));
+        Panel panelCentro = new Panel(new GridLayout(3, 1, 10, 10));
+        panelCentro.add(new Label("FECHA DE SESIÓN (dd/MM/yyyy):", Label.CENTER));
 
-        TextField txtFecha = new TextField(new Date().toString());
-        txtFecha.setEditable(false);
+        // Creamos un formateador para mostrar y leer la fecha
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        TextField txtFecha = new TextField(sdf.format(new Date()));
+        txtFecha.setEditable(true); // ¡Ahora es editable!
+
         Panel pTxt = new Panel();
         pTxt.add(txtFecha);
         panelCentro.add(pTxt);
@@ -34,8 +38,15 @@ public class VentanaLogin extends Frame {
         Button btnContinuar = new Button("CONTINUAR --->");
         btnContinuar.setFont(new Font("Arial", Font.BOLD, 14));
         btnContinuar.addActionListener(e -> {
-            new VentanaMesas(new Date()).setVisible(true);
-            this.dispose();
+            try {
+                // Intentamos convertir el texto ingresado en un objeto Date
+                Date fechaSeleccionada = sdf.parse(txtFecha.getText());
+                new VentanaMesas(fechaSeleccionada).setVisible(true);
+                this.dispose();
+            } catch (Exception ex) {
+                // Si el usuario escribe letras o un formato raro, salta este error
+                MensajesAWT.mostrarMensaje(this, "Formato de fecha incorrecto. Usa dd/MM/yyyy", "Error");
+            }
         });
 
         Panel panelSur = new Panel();
