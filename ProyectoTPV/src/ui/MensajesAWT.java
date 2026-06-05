@@ -77,7 +77,7 @@ public class MensajesAWT {
         d.setLayout(new GridLayout(3, 1));
         d.add(new Label(mensaje, Label.CENTER));
         TextField txt = new TextField(15);
-        txt.setEchoChar('*'); // Esto oculta el texto como contraseña
+        txt.setEchoChar('*');
         Panel pTxt = new Panel(); pTxt.add(txt);
         d.add(pTxt);
 

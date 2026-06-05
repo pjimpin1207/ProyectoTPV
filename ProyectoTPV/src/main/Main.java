@@ -1,11 +1,12 @@
 package main;
 
 import ui.VentanaLogin;
-import javax.swing.SwingUtilities;
+import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
+        // Ejecutamos la ventana en el hilo de eventos de AWT
+        java.awt.EventQueue.invokeLater(() -> {
             VentanaLogin ventana = new VentanaLogin();
             ventana.setVisible(true);
         });

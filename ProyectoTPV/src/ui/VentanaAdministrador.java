@@ -77,10 +77,18 @@ public class VentanaAdministrador extends Frame {
 
                 if ("Modificar Nombre".equals(eleccion)) {
                     String nName = MensajesAWT.pedirInput(this, "Nuevo nombre:", "Renombrar", p.getNombre());
-                    if (nName != null) { productoDAO.modificarNombreProducto(seleccionado, nName.toUpperCase()); MensajesAWT.mostrarMensaje(this, "Nombre actualizado.", "Info"); }
+                    if (nName != null && !nName.trim().isEmpty()) {
+                        productoDAO.modificarNombreProducto(seleccionado, nName.toUpperCase());
+                        MensajesAWT.mostrarMensaje(this, "Nombre actualizado.", "Info");
+                    }
                 } else if ("Modificar Precio".equals(eleccion)) {
                     String nPrecio = MensajesAWT.pedirInput(this, "Nuevo precio (€):", "Precio", String.valueOf(p.getPrecio()));
-                    if (nPrecio != null) { productoDAO.modificarProducto(seleccionado, Float.parseFloat(nPrecio.replace(",", "."))); MensajesAWT.mostrarMensaje(this, "Precio actualizado.", "Info"); }
+                    if (nPrecio != null) {
+                        try {
+                            productoDAO.modificarProducto(seleccionado, Float.parseFloat(nPrecio.replace(",", ".")));
+                            MensajesAWT.mostrarMensaje(this, "Precio actualizado.", "Info");
+                        } catch(Exception ex) { MensajesAWT.mostrarMensaje(this, "Formato incorrecto", "Error"); }
+                    }
                 } else if ("Eliminar Producto".equals(eleccion)) {
                     if (MensajesAWT.pedirConfirmacion(this, "¿Seguro que quieres eliminarlo?", "Eliminar")) {
                         productoDAO.eliminarProducto(seleccionado);
@@ -92,7 +100,10 @@ public class VentanaAdministrador extends Frame {
 
         btnAñadirCam.addActionListener(e -> {
             String nombre = MensajesAWT.pedirInput(this, "Nombre del camarero:", "Añadir", "");
-            if (nombre != null && !nombre.trim().isEmpty()) { usuarioDAO.insertarCamarero(nombre.toUpperCase()); MensajesAWT.mostrarMensaje(this, "Camarero añadido.", "Info"); }
+            if (nombre != null && !nombre.trim().isEmpty()) {
+                usuarioDAO.insertarCamarero(nombre.toUpperCase());
+                MensajesAWT.mostrarMensaje(this, "Camarero añadido.", "Info");
+            }
         });
 
         btnEliminarCam.addActionListener(e -> {
@@ -100,7 +111,8 @@ public class VentanaAdministrador extends Frame {
             if(!cams.isEmpty()){
                 String sel = MensajesAWT.pedirOpcion(this, "Selecciona camarero:", "Despedir", cams.toArray(new String[0]));
                 if (sel != null && MensajesAWT.pedirConfirmacion(this, "¿Eliminar a " + sel + "?", "Confirmar")) {
-                    usuarioDAO.eliminarCamarero(sel); MensajesAWT.mostrarMensaje(this, "Camarero eliminado.", "Info");
+                    usuarioDAO.eliminarCamarero(sel);
+                    MensajesAWT.mostrarMensaje(this, "Camarero eliminado.", "Info");
                 }
             }
         });
@@ -129,10 +141,15 @@ public class VentanaAdministrador extends Frame {
         TicketObjectDBDAO tDao = new TicketObjectDBDAO();
         List<Ticket> ticketsHoy = tDao.obtenerTicketsHoy();
 
-        if (ticketsHoy.isEmpty()) { MensajesAWT.mostrarMensaje(this, "No hay tickets hoy.", "Cierre"); return; }
+        if (ticketsHoy.isEmpty()) {
+            MensajesAWT.mostrarMensaje(this, "No hay tickets hoy.", "Cierre");
+            return;
+        }
 
         float totalCaja = 0;
-        for (Ticket t : ticketsHoy) { totalCaja += t.getTotal(); }
+        for (Ticket t : ticketsHoy) {
+            totalCaja += t.getTotal();
+        }
 
         String ruta = System.getProperty("user.home") + File.separator + "Desktop" + File.separator + "Historial_Cierres_Caja.txt";
 
@@ -140,8 +157,10 @@ public class VentanaAdministrador extends Frame {
             String fecha = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
             fw.write("=======================================\nCIERRE DE CAJA - " + fecha + "\n");
             fw.write("TOTAL FACTURADO: " + String.format("%.2f", totalCaja) + "€\nTickets: " + ticketsHoy.size() + "\n=======================================\n\n");
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+            MensajesAWT.mostrarMensaje(this, "Error al guardar el archivo", "Error");
+        }
 
-        MensajesAWT.mostrarMensaje(this, "TOTAL FACTURADO HOY: " + String.format("%.2f", totalCaja) + "€", "Cierre Diario");
+        MensajesAWT.mostrarMensaje(this, "TOTAL FACTURADO HOY: " + String.format("%.2f", totalCaja) + "€\nGuardado en Escritorio.", "Cierre Diario");
     }
 }
